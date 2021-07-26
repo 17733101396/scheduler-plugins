@@ -1,7 +1,8 @@
 FROM golang:1.5-alpine 
 WORKDIR /go/src/github.com/kubernetes-sigs/scheduler-plugins
 COPY . .
-env GOARCH=amd64 GOOS=linux 
+ENV GOARCH amd64 
+ENV GOOS linux 
 RUN go build -o kube-scheduler main.go
 
 FROM golang:1.5-alpine 
