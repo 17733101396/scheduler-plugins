@@ -1,9 +1,25 @@
-FROM golang:1.5-alpine 
-WORKDIR /go/src/github.com/kubernetes-sigs/scheduler-plugins
-COPY . .
-ENV GOARCH amd64 
-ENV GOOS linux 
-RUN RELEASE_VERSION=1.18 go build -o kube-scheduler main.go
+# Copyright 2020 The Kubernetes Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+FROM golang:1.15.0
 
-FROM golang:1.5-alpine 
-COPY --from=0 /go/src/github.com/kubernetes-sigs/scheduler-plugins/kube-scheduler /usr/local/bin/kube-scheduler
+WORKDIR /go/src/sigs.k8s.io/scheduler-plugins
+COPY . .
+RUN RELEASE_VERSION=1.18 make build-scheduler
+
+FROM alpine:3.12
+
+COPY --from=0 /go/src/sigs.k8s.io/scheduler-plugins/bin/kube-scheduler /bin/kube-scheduler
+
+WORKDIR /bin
+CMD ["kube-scheduler"]
